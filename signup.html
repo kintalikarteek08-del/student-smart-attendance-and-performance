@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Smart Board - Sign Up</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="login-body">
+    <div class="login-container">
+        <div class="login-card">
+            <div class="login-header">
+               
+                <p>Teacher Registration Portal</p>
+            </div>
+
+            <form id="signupForm" class="login-form">
+                <div class="form-group">
+                    <label for="username">👤 Username</label>
+                    <input type="text" id="username" name="username" required placeholder="Choose a username">
+                </div>
+
+                <div class="form-group">
+                    <label for="email">📧 Email (Optional)</label>
+                    <input type="email" id="email" name="email" placeholder="Enter your email">
+                </div>
+
+                <div class="form-group">
+                    <label for="role">🎓 Role</label>
+                    <select id="role" name="role" required>
+                        <option value="">Select your role</option>
+                        <option value="class">Class Teacher</option>
+                        <option value="subject">Subject Teacher</option>
+                    </select>
+                </div>
+
+                <div class="form-group" id="subjectGroup" style="display: none;">
+                    <label for="subject">📚 Subject (for Subject Teachers)</label>
+                    <select id="subject" name="subject">
+                        <option value="">Select your subject</option>
+                        <option value="SC">Science</option>
+                        <option value="MA">Maths</option>
+                        <option value="SS">Social Studies</option>
+                        <option value="EN">English</option>
+                        <option value="TE">Telugu</option>
+                        <option value="HI">Hindi</option>
+                        <option value="DR">Drawing</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">🔒 Password</label>
+                    <input type="password" id="password" name="password" required placeholder="Create a password">
+                    <small class="password-hint">Password must be at least 6 characters long</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="confirmPassword">🔒 Confirm Password</label>
+                    <input type="password" id="confirmPassword" name="confirmPassword" required placeholder="Confirm your password">
+                </div>
+
+                <button type="submit" class="login-btn" id="signupBtn">
+                    <span class="btn-text">Sign Up</span>
+                    <div class="loading-spinner" id="loadingSpinner" style="display: none;"></div>
+                </button>
+            </form>
+
+            <div id="message" class="message"></div>
+
+            <div class="login-footer">
+                <p>Already have an account? <a href="index.html" class="signup-link">Login here</a></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Show/hide subject field based on role selection
+        document.getElementById('role').addEventListener('change', function() {
+            const subjectGroup = document.getElementById('subjectGroup');
+            const subjectSelect = document.getElementById('subject');
+
+            if (this.value === 'subject') {
+                subjectGroup.style.display = 'block';
+                subjectSelect.required = true;
+            } else {
+                subjectGroup.style.display = 'none';
+                subjectSelect.required = false;
+            }
+        });
+
+        document.getElementById('signupForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const username = document.getElementById('username').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const role = document.getElementById('role').value;
+            const subject = document.getElementById('subject').value;
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            const signupBtn = document.getElementById('signupBtn');
+            const btnText = document.querySelector('.btn-text');
+            const loadingSpinner = document.getElementById('loadingSpinner');
+            const messageDiv = document.getElementById('message');
+
+            // Clear previous messages
+            messageDiv.textContent = '';
+
+            // Validation
+            if (password.length < 6) {
+                messageDiv.className = 'message error';
+                messageDiv.textContent = 'Password must be at least 6 characters long';
+                return;
+            }
+
+            if (password !== confirmPassword) {
+                messageDiv.className = 'message error';
+                messageDiv.textContent = 'Passwords do not match';
+                return;
+            }
+
+            if (role === 'subject' && !subject) {
+                messageDiv.className = 'message error';
+                messageDiv.textContent = 'Please select a subject for subject teachers';
+                return;
+            }
+
+            // Show loading state
+            signupBtn.disabled = true;
+            btnText.style.display = 'none';
+            loadingSpinner.style.display = 'block';
+
+            try {
+                const response = await fetch('/api/signup', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        username,
+                        email,
+                        role,
+                        subject: role === 'subject' ? subject : null,
+                        password
+                    }),
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    // Success
+                    messageDiv.className = 'message success';
+                    messageDiv.textContent = 'Account created successfully! Redirecting to login...';
+
+                    setTimeout(() => {
+                        window.location.href = 'index.html';
+                    }, 2000);
+                } else {
+                    // Error
+                    messageDiv.className = 'message error';
+                    messageDiv.textContent = data.message || 'Registration failed. Please try again.';
+                }
+            } catch (error) {
+                console.error('Signup error:', error);
+                messageDiv.className = 'message error';
+                messageDiv.textContent = 'Network error. Please check your connection and try again.';
+            } finally {
+                // Reset loading state
+                signupBtn.disabled = false;
+                btnText.style.display = 'inline';
+                loadingSpinner.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>

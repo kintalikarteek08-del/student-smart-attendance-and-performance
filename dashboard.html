@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Smart Board - Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+
+    <!-- DASHBOARD -->
+    <div id="dashboardSection">
+
+        <!-- NAVBAR -->
+        <div class="card navbar">
+            <div class="controls">
+                <label>Select Subject</label>
+                <select id="subjectSelect" onchange="loadSubjectData()" class="subject-select">
+                    <option value="">--Select Subject--</option>
+                </select>
+            </div>
+
+            <div class="nav-buttons">
+                <button onclick="showAttendance()" class="btn">Attendance</button>
+                <button onclick="showPerformance()" class="btn">Performance</button>
+                <button onclick="showSchedule()" class="btn">Schedule</button>
+                <button onclick="showEvents()" class="btn">Events</button>
+                <button onclick="showClassReport()" class="btn">Report</button>
+                <button onclick="showChangePassword()" class="btn">Change Password</button>
+                <button onclick="showAddStudent()" class="btn">Add Student</button>
+                <button onclick="logout()" class="btn logout-btn">Logout</button>
+            </div>
+        </div>
+
+        <!-- ATTENDANCE -->
+        <div id="attendanceSection" class="card">
+            <h2 id="attendanceTitle">Attendance</h2>
+            <p id="attendanceDate"></p>
+
+            <table id="attendanceTable">
+                <tr>
+                    <th>Roll No</th>
+                    <th>Name</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </table>
+
+            <p><strong>Class Attendance:</strong> <span id="classPercent">0%</span></p>
+            <div class="progress-bar">
+                <div class="progress-fill" style="width: 0%"></div>
+            </div>
+        </div>
+
+        <!-- PERFORMANCE -->
+        <div id="performanceSection" class="card" style="display:none">
+            <h2 id="performanceTitle">Weekly Performance</h2>
+            <p id="performanceDate"></p>
+
+            <div class="controls">
+                <input type="number" id="roll" placeholder="Roll No">
+                <input type="number" id="marks" placeholder="Marks (0-20)">
+                <button onclick="savePerformance()" class="btn">Save</button>
+            </div>
+
+            <p id="message"></p>
+
+            <table id="performanceTable">
+                <tr>
+                    <th>Roll No</th>
+                    <th>Name</th>
+                    <th>Marks</th>
+                </tr>
+            </table>
+        </div>
+
+        <!-- SCHEDULE -->
+        <div id="scheduleSection" class="card" style="display:none">
+            <h2>📅 Academic Schedule</h2>
+
+            <h3>📚 Weekly Timetable</h3>
+            <table>
+                <tr>
+                    <th>Day</th>
+                    <th>Period 1</th>
+                    <th>Period 2</th>
+                    <th>Period 3</th>
+                    <th>Period 4</th>
+                    <th>Period 5</th>
+                    <th>Period 6</th>
+                </tr>
+                <tr>
+                    <td>Monday</td>
+                    <td class="schedule-period">Science</td>
+                    <td class="schedule-period">Maths</td>
+                    <td class="schedule-period">English</td>
+                    <td class="schedule-period">Telugu</td>
+                    <td class="schedule-period">Break</td>
+                    <td class="schedule-period">Social Studies</td>
+                </tr>
+                <tr>
+                    <td>Tuesday</td>
+                    <td class="schedule-period">Maths</td>
+                    <td class="schedule-period">Science</td>
+                    <td class="schedule-period">Hindi</td>
+                    <td class="schedule-period">English</td>
+                    <td class="schedule-period">Break</td>
+                    <td class="schedule-period">Drawing</td>
+                </tr>
+                <tr>
+                    <td>Wednesday</td>
+                    <td class="schedule-period">English</td>
+                    <td class="schedule-period">Telugu</td>
+                    <td class="schedule-period">Social Studies</td>
+                    <td class="schedule-period">Science</td>
+                    <td class="schedule-period">Break</td>
+                    <td class="schedule-period">Maths</td>
+                </tr>
+                <tr>
+                    <td>Thursday</td>
+                    <td class="schedule-period">Social Studies</td>
+                    <td class="schedule-period">English</td>
+                    <td class="schedule-period">Maths</td>
+                    <td class="schedule-period">Hindi</td>
+                    <td class="schedule-period">Break</td>
+                    <td class="schedule-period">Telugu</td>
+                </tr>
+                <tr>
+                    <td>Friday</td>
+                    <td class="schedule-period">Science</td>
+                    <td class="schedule-period">Drawing</td>
+                    <td class="schedule-period">Telugu</td>
+                    <td class="schedule-period">Maths</td>
+                    <td class="schedule-period">Break</td>
+                    <td class="schedule-period">English</td>
+                </tr>
+                <tr>
+                    <td>Saturday</td>
+                    <td class="schedule-period">Hindi</td>
+                    <td class="schedule-period">Social Studies</td>
+                    <td class="schedule-period">Science</td>
+                    <td class="schedule-period">English</td>
+                    <td class="schedule-period">Break</td>
+                    <td class="schedule-period">Maths</td>
+                </tr>
+            </table>
+
+            <h3>🎯 Upcoming Events</h3>
+            <div id="upcomingEvents">
+                <div class="upcoming-event">
+                    <p><strong>Next Week:</strong> Unit Test - Science (Monday)</p>
+                </div>
+                <div class="upcoming-event">
+                    <p><strong>Next Month:</strong> Mid-term Examinations (15th - 25th)</p>
+                </div>
+                <div class="upcoming-event">
+                    <p><strong>School Events:</strong> Annual Sports Day (Last week of month)</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- EVENTS -->
+        <div id="eventsSection" class="card" style="display:none">
+            <h2>🎉 School Events Management</h2>
+
+            <div class="controls">
+                <input type="text" id="eventTitle" placeholder="Event Title (e.g., Annual Day)">
+                <input type="date" id="eventDate">
+                <input type="text" id="eventDescription" placeholder="Event Description (optional)">
+                <button onclick="addEvent()" class="btn">➕ Add Event</button>
+            </div>
+
+            <p id="eventMsg"></p>
+
+            <h3>📅 Upcoming Events</h3>
+            <div id="eventsList"></div>
+        </div>
+
+        <!-- REPORT -->
+        <div id="classReportSection" class="card" style="display:none">
+            <h2>📊 Attendance Report</h2>
+
+            <table id="reportTable">
+                <tr>
+                    <th>Roll</th>
+                    <th>Name</th>
+                    <th>Attendance %</th>
+                    <th>Status</th>
+                </tr>
+            </table>
+        </div>
+
+        <!-- CHANGE PASSWORD -->
+        <div id="changePasswordSection" class="card" style="display:none">
+            <h2>🔒 Change Password</h2>
+
+            <label>Current Password</label>
+            <input type="password" id="currentPassword" placeholder="Enter current password">
+
+            <label>New Password</label>
+            <input type="password" id="newPassword" placeholder="Enter new password">
+
+            <label>Confirm New Password</label>
+            <input type="password" id="confirmPassword" placeholder="Confirm new password">
+
+            <button onclick="changePassword()" class="btn">Change Password</button>
+
+            <p id="passwordMsg"></p>
+        </div>
+
+        <!-- ADD STUDENT -->
+        <div id="addStudentSection" class="card" style="display:none">
+            <h2>👨‍🎓 Add New Student</h2>
+
+            <label>Roll Number</label>
+            <input type="number" id="newRoll" placeholder="Enter roll number">
+
+            <label>Student Name</label>
+            <input type="text" id="newName" placeholder="Enter student name">
+
+            <button onclick="addStudent()" class="btn">Add Student</button>
+
+            <p id="studentMsg"></p>
+
+            <h3>Current Students</h3>
+            <table id="studentsTable">
+                <tr>
+                    <th>Roll No</th>
+                    <th>Name</th>
+                    <th>Action</th>
+                </tr>
+            </table>
+        </div>
+
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
