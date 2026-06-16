@@ -6,6 +6,18 @@ require("dotenv").config();
 
 const app = express();
 
+require("dotenv").config();
+
+const PORT = process.env.PORT || 5000;
+
+mongoose.connect(process.env.MONGODB_URI)
+  .then(() => console.log("MongoDB connected"))
+  .catch(err => console.log("MongoDB connection failed:", err));
+
+app.listen(PORT, () => {
+  console.log(`🚀 Server running on http://localhost:${PORT}`);
+});
+
 /* =========================
    MIDDLEWARE
 ========================= */
@@ -23,6 +35,10 @@ app.get("/", (req, res) => {
 
 app.get("/signup", (req, res) => {
   res.sendFile(path.join(__dirname, "signup.html"));
+});
+
+app.get("/login", (req, res) => {
+  res.sendFile(path.join(__dirname, "index.html"));
 });
 
 app.get("/dashboard", (req, res) => {
@@ -132,6 +148,48 @@ let users = [
     subjects: ["SC"],
     email: "science@example.com",
   },
+  {
+    username: "math_teacher",
+    password: "math123",
+    role: "subject",
+    subjects: ["MA"],
+    email: "maths@example.com",
+  },
+  {
+    username: "ss_teacher",
+    password: "ss123",
+    role: "subject",
+    subjects: ["SS"],
+    email: "social@example.com",
+  },
+  {
+    username: "en_teacher",
+    password: "en123",
+    role: "subject",
+    subjects: ["EN"],
+    email: "english@example.com",
+  },
+  {
+    username: "tel_teacher",
+    password: "tel123",
+    role: "subject",
+    subjects: ["TE"],
+    email: "telugu@example.com",
+  },
+  {
+    username: "hi_teacher",
+    password: "hi123",
+    role: "subject",
+    subjects: ["HI"],
+    email: "hindi@example.com",
+  },
+  {
+    username: "dr_teacher",
+    password: "dr123",
+    role: "subject",
+    subjects: ["DR"],
+    email: "drawing@example.com",
+  },
 ];
 
 /* =========================
@@ -206,6 +264,42 @@ app.post("/api/signup", (req, res) => {
   res.json({
     success: true,
     message: "Signup successful",
+    user: newUser,
+  });
+});
+
+app.post("/api/change-password", (req, res) => {
+  const { username, currentPassword, newPassword } = req.body;
+
+  if (!username || !currentPassword || !newPassword) {
+    return res.status(400).json({
+      success: false,
+      message: "Required fields missing",
+    });
+  }
+
+  if (newPassword.length < 6) {
+    return res.status(400).json({
+      success: false,
+      message: "New password must be at least 6 characters",
+    });
+  }
+
+  const user = users.find((u) => u.username === username);
+
+  if (!user || user.password !== currentPassword) {
+    return res.status(401).json({
+      success: false,
+      message: "Current password is incorrect",
+    });
+  }
+
+  user.password = newPassword;
+
+  res.json({
+    success: true,
+    message: "Password changed successfully",
+    user,
   });
 });
 
@@ -370,11 +464,3 @@ app.get("/api/report/:studentId", async (req, res) => {
   }
 });
 
-/* =========================
-   SERVER
-========================= */
-const PORT = process.env.PORT || 4000;
-
-app.listen(PORT, () => {
-  console.log(`🚀 Server running on http://localhost:${PORT}`);
-});

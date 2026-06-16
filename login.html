@@ -200,8 +200,7 @@
     </div>
 
     <script>
-        // FIXED: Changed API_BASE from port 3000 to 4000
-        const API_BASE = 'http://localhost:4000/api';
+        const API_BASE = '/api';
 
         function showMessage(text, type = 'error') {
             const messageEl = document.getElementById('message');
@@ -256,6 +255,7 @@
                     // FIXED: Changed localStorage keys to match backend (teacherLoggedIn instead of loggedIn)
                     localStorage.setItem('teacherLoggedIn', 'true');
                     localStorage.setItem('teacherUsername', username);
+                    localStorage.setItem('user', JSON.stringify(data.user));
 
                     showMessage('Login successful! Redirecting...', 'success');
 

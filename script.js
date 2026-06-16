@@ -21,8 +21,7 @@ const USERS = [
     { username: 'hi_teacher', password: 'hi123', role: 'subject', subjects: ['HI'] }
 ];
 
-// FIXED: Corrected port from 3000 to 4000 to match server.js
-const API_BASE = 'http://localhost:4000/api';
+const API_BASE = '/api';
 
 const STUDENT_ROLLS = [1, 2];
 const STUDENT_NAMES = {
@@ -38,7 +37,14 @@ let currentSubject = null;
 
 function getCurrentUser() {
     const user = localStorage.getItem('user');
-    return user ? JSON.parse(user) : null;
+    if (!user) return null;
+
+    try {
+        return JSON.parse(user);
+    } catch (error) {
+        localStorage.removeItem('user');
+        return null;
+    }
 }
 
 async function apiGet(path) {
@@ -216,6 +222,7 @@ function login() {
 function logout() {
     localStorage.removeItem('teacherLoggedIn');
     localStorage.removeItem('teacherUsername');
+    localStorage.removeItem('user');
     window.location.href = 'index.html';
 }
 
@@ -317,8 +324,9 @@ async function loadAttendanceTable() {
         const record = todayRecords.find(r => r.student && r.student.roll === roll);
         const status = record ? record.status : '-';
 
-        row.insertCell(2).innerText = status;
-        row.insertCell(2).id = `status-${roll}`;
+        const statusCell = row.insertCell(2);
+        statusCell.innerText = status;
+        statusCell.id = `status-${roll}`;
 
         const actionCell = row.insertCell(3);
         actionCell.innerHTML = `
@@ -470,9 +478,9 @@ function updateClassPercent() {
         if (status === 'Present') present++;
     });
 
-    const percent = Math.round(
-        (present / STUDENT_ROLLS.length) * 100
-    );
+    const percent = STUDENT_ROLLS.length
+        ? Math.round((present / STUDENT_ROLLS.length) * 100)
+        : 0;
 
     const percentElement = document.getElementById('classPercent');
     const oldPercent = parseInt(percentElement.textContent) || 0;
@@ -658,7 +666,7 @@ function loadScheduleInteractions() {
     }
 }
 
-function changePassword() {
+async function changePassword() {
     const currentPassword = document.getElementById('currentPassword').value;
     const newPassword = document.getElementById('newPassword').value;
     const confirmPassword = document.getElementById('confirmPassword').value;
@@ -707,37 +715,43 @@ function changePassword() {
         return;
     }
 
-    setTimeout(() => {
-        // Update password in USERS array (in a real app, this would be server-side)
-        const userIndex = USERS.findIndex(u => u.username === user.username);
-        if (userIndex !== -1) {
-            USERS[userIndex].password = newPassword;
-            user.password = newPassword;
-            localStorage.setItem('user', JSON.stringify(user));
-        }
+    const result = await apiPost('/change-password', {
+        username: user.username,
+        currentPassword,
+        newPassword
+    });
 
-        msg.innerText = 'Password changed successfully';
-        msg.className = 'success-msg';
-        showToast('Password changed successfully!', 'success');
-
-        // Clear form with animation
-        const inputs = ['currentPassword', 'newPassword', 'confirmPassword'];
-        inputs.forEach(id => {
-            const input = document.getElementById(id);
-            input.style.animation = 'fadeOut 0.3s ease-out';
-        });
-
-        setTimeout(() => {
-            inputs.forEach(id => {
-                document.getElementById(id).value = '';
-                document.getElementById(id).style.animation = '';
-            });
-            msg.innerText = '';
-        }, 2000);
-
+    if (!result || !result.success) {
+        msg.innerText = 'Could not change password';
+        msg.className = 'error-msg';
+        showToast('Could not change password', 'error');
         button.classList.remove('loading');
         button.textContent = 'Change Password';
-    }, 800);
+        return;
+    }
+
+    localStorage.setItem('user', JSON.stringify(result.user));
+
+    msg.innerText = 'Password changed successfully';
+    msg.className = 'success-msg';
+    showToast('Password changed successfully!', 'success');
+
+    const inputs = ['currentPassword', 'newPassword', 'confirmPassword'];
+    inputs.forEach(id => {
+        const input = document.getElementById(id);
+        input.style.animation = 'fadeOut 0.3s ease-out';
+    });
+
+    setTimeout(() => {
+        inputs.forEach(id => {
+            document.getElementById(id).value = '';
+            document.getElementById(id).style.animation = '';
+        });
+        msg.innerText = '';
+    }, 2000);
+
+    button.classList.remove('loading');
+    button.textContent = 'Change Password';
 }
 
 async function addStudent() {

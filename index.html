@@ -72,6 +72,7 @@
                     // Success - store session and redirect
                     localStorage.setItem('teacherLoggedIn', 'true');
                     localStorage.setItem('teacherUsername', username);
+                    localStorage.setItem('user', JSON.stringify(data.user));
                     messageDiv.className = 'message success';
                     messageDiv.textContent = 'Login successful! Redirecting...';
 
